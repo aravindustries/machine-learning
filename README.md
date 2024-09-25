@@ -1,2 +1,2 @@
-# machine-learning
+# Machine Learning
 Arav's Machine Learning Projects 
