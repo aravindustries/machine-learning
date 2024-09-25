@@ -25,14 +25,11 @@ def fetchProstateCancerData(url):
 
 
 def concatenate_square_and_product(data):
-
     if not isinstance(data, np.ndarray) or data.ndim != 2:
         raise ValueError("Input must be a 2D NumPy array.")
-
+    
     squared = data ** 2
-
-    product = np.multiply(data, data)
-
+    product = np.multiply(data, data[:, ::-1])
     result = np.concatenate((data, squared, product), axis=1)
 
     return result
@@ -41,21 +38,23 @@ url = 'https://hastie.su.domains/ElemStatLearn/datasets/prostate.data'
 
 pcdata = data(fetchProstateCancerData(url))
 
-X_train = pcdata.train.iloc[:, :8].to_numpy()
-y_train = pcdata.train.iloc[:, 8].to_numpy()
+edge = 8
 
-X_val = pcdata.valid.iloc[:, :8].to_numpy()
-y_val = pcdata.valid.iloc[:, 8].to_numpy()
+X_train = pcdata.train.iloc[:, :edge].to_numpy()
+y_train = pcdata.train.iloc[:, edge].to_numpy()
 
-X_test = pcdata.test.iloc[:, :8].to_numpy()
-y_test = pcdata.test.iloc[:, 8].to_numpy()
+X_val = pcdata.valid.iloc[:, :edge].to_numpy()
+y_val = pcdata.valid.iloc[:, edge].to_numpy()
 
-feature_names = pcdata.train.iloc[:, :8].columns
+X_test = pcdata.test.iloc[:, :edge].to_numpy()
+y_test = pcdata.test.iloc[:, edge].to_numpy()
+
+feature_names = pcdata.train.iloc[:, :edge].columns
 
 print()
 print('Table 3.1:')
 
-print(pcdata.train.iloc[:, 0:8].corr())
+print(pcdata.train.iloc[:, 0:edge].corr())
 
 linear_model = LinearRegression()
 
@@ -114,7 +113,19 @@ mse_lasso = np.mean((y_test - y_pred_lasso) ** 2)
 print(f'Lasso Regression MSE: {mse_lasso}')
 print(f'Selected Features: {lasso_model.get_selected_features()}')
 
+X_nonlinear_train = concatenate_square_and_product(X_train)
+X_nonlinear_test = concatenate_square_and_product(X_test)
 
+linear_model2 = LinearRegression()
+
+linear_model2.fit(X_nonlinear_train, y_train)
+
+y_pred_lin2 = linear_model2.predict(X_nonlinear_test)
+
+mse_lin2 = np.mean((y_test - y_pred_lin2) ** 2)
+
+print()
+print(f'Linear Regression on Nonlinear Dataset MSE: {mse_lin2}')
 
 # plt.plot(y_test, label='y')
 # plt.plot(y_pred_lin, label='y_lin')

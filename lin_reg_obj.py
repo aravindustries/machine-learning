@@ -22,7 +22,7 @@ class LinearRegression:
     def fit(self, X, y):
         X_b = np.c_[np.ones((X.shape[0], 1)), X]
         
-        theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y
+        theta_best = np.linalg.pinv(X_b.T @ X_b) @ X_b.T @ y
         
         self.intercept = theta_best[0]
         self.coefficients = theta_best[1:]
@@ -34,7 +34,7 @@ class LinearRegression:
         p = X.shape[1]
         residual_variance = (residuals.T @ residuals) / (n - p - 1)
         
-        cov_matrix = np.linalg.inv(X_b.T @ X_b) * residual_variance
+        cov_matrix = np.linalg.pinv(X_b.T @ X_b) * residual_variance
         
         self.standard_errors = np.sqrt(np.diag(cov_matrix))
         
